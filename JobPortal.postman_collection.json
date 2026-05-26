@@ -1,0 +1,616 @@
+{
+  "info": {
+    "name": "Job Portal API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Complete API collection for the Job Portal application. Set the `baseUrl` variable before use. Login/Register requests auto-save tokens to collection variables."
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080/api", "type": "string" },
+    { "key": "accessToken", "value": "", "type": "string" },
+    { "key": "refreshToken", "value": "", "type": "string" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"Password1!\",\n  \"role\": \"ROLE_JOB_SEEKER\",\n  \"phone\": \"+9779800000001\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Register a new user. `role` must be one of: `ROLE_JOB_SEEKER`, `ROLE_JOB_PROVIDER`, `ROLE_TRAINING_PROVIDER`, `ROLE_ADMIN`."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.data) {",
+                  "  pm.collectionVariables.set('accessToken', json.data.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', json.data.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"Password1!\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.data) {",
+                  "  pm.collectionVariables.set('accessToken', json.data.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', json.data.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/refresh", "host": ["{{baseUrl}}"], "path": ["auth", "refresh"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.data) {",
+                  "  pm.collectionVariables.set('accessToken', json.data.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', json.data.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/auth/logout", "host": ["{{baseUrl}}"], "path": ["auth", "logout"] },
+            "description": "Revokes all refresh tokens for the currently authenticated user."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Jobs (Public)",
+      "item": [
+        {
+          "name": "Search Jobs",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/jobs/search?keyword=developer&location=Kathmandu&jobType=FULL_TIME&experienceLevel=MID&salaryMin=30000&salaryMax=100000&page=0&size=20&sortBy=relevance",
+              "host": ["{{baseUrl}}"],
+              "path": ["jobs", "search"],
+              "query": [
+                { "key": "keyword", "value": "developer", "description": "Free-text search" },
+                { "key": "location", "value": "Kathmandu" },
+                { "key": "jobType", "value": "FULL_TIME", "description": "FULL_TIME | PART_TIME | CONTRACT | INTERNSHIP | FREELANCE" },
+                { "key": "experienceLevel", "value": "MID", "description": "FRESHER | JUNIOR | MID | SENIOR | LEAD" },
+                { "key": "salaryMin", "value": "30000" },
+                { "key": "salaryMax", "value": "100000" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" },
+                { "key": "sortBy", "value": "relevance", "description": "relevance | date | salary" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Job by ID",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/jobs/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["jobs", "1"]
+            },
+            "description": "Increments view count on each call."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Skills (Public)",
+      "item": [
+        {
+          "name": "Search Skills",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/skills/search?q=java",
+              "host": ["{{baseUrl}}"],
+              "path": ["skills", "search"],
+              "query": [{ "key": "q", "value": "java", "description": "Name fragment to search" }]
+            }
+          }
+        },
+        {
+          "name": "Get All Skills",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/skills", "host": ["{{baseUrl}}"], "path": ["skills"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Seeker",
+      "description": "Requires a JWT for a user with role ROLE_JOB_SEEKER. Login with a seeker account first.",
+      "item": [
+        {
+          "name": "Profile",
+          "item": [
+            {
+              "name": "Get Profile",
+              "request": {
+                "method": "GET",
+                "url": { "raw": "{{baseUrl}}/seeker/profile", "host": ["{{baseUrl}}"], "path": ["seeker", "profile"] },
+                "description": "Auto-creates profile on first call."
+              }
+            },
+            {
+              "name": "Update Profile",
+              "request": {
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": { "raw": "{{baseUrl}}/seeker/profile", "host": ["{{baseUrl}}"], "path": ["seeker", "profile"] },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"headline\": \"Full Stack Developer with 3 years experience\",\n  \"summary\": \"Passionate developer skilled in Spring Boot and React.\",\n  \"location\": \"Kathmandu, Nepal\",\n  \"visibility\": \"PUBLIC\",\n  \"currentSalary\": 60000,\n  \"expectedSalary\": 80000,\n  \"totalExperience\": 3,\n  \"linkedinUrl\": \"https://linkedin.com/in/johndoe\",\n  \"githubUrl\": \"https://github.com/johndoe\",\n  \"portfolioUrl\": \"https://johndoe.dev\",\n  \"activelyLooking\": true\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "description": "`visibility`: PUBLIC | PRIVATE | CONNECTIONS_ONLY"
+              }
+            },
+            {
+              "name": "Upload Resume",
+              "request": {
+                "method": "POST",
+                "url": { "raw": "{{baseUrl}}/seeker/profile/resume", "host": ["{{baseUrl}}"], "path": ["seeker", "profile", "resume"] },
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    { "key": "file", "type": "file", "src": "", "description": "PDF or DOCX, max 5 MB" }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Experience",
+          "item": [
+            {
+              "name": "Add Experience",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": { "raw": "{{baseUrl}}/seeker/profile/experience", "host": ["{{baseUrl}}"], "path": ["seeker", "profile", "experience"] },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"company\": \"Tech Nepal Pvt. Ltd.\",\n  \"title\": \"Backend Developer\",\n  \"description\": \"Developed REST APIs using Spring Boot.\",\n  \"startDate\": \"2022-01-01\",\n  \"endDate\": null,\n  \"isCurrent\": true\n}",
+                  "options": { "raw": { "language": "json" } }
+                }
+              }
+            },
+            {
+              "name": "Delete Experience",
+              "request": {
+                "method": "DELETE",
+                "url": {
+                  "raw": "{{baseUrl}}/seeker/profile/experience/1",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["seeker", "profile", "experience", "1"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Education",
+          "item": [
+            {
+              "name": "Add Education",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": { "raw": "{{baseUrl}}/seeker/profile/education", "host": ["{{baseUrl}}"], "path": ["seeker", "profile", "education"] },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"institution\": \"Tribhuvan University\",\n  \"degree\": \"Bachelor of Computer Science\",\n  \"field\": \"Computer Science\",\n  \"year\": 2021,\n  \"grade\": \"3.8 GPA\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                }
+              }
+            },
+            {
+              "name": "Delete Education",
+              "request": {
+                "method": "DELETE",
+                "url": {
+                  "raw": "{{baseUrl}}/seeker/profile/education/1",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["seeker", "profile", "education", "1"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Skills",
+          "item": [
+            {
+              "name": "Add / Update Skill",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": { "raw": "{{baseUrl}}/seeker/profile/skills", "host": ["{{baseUrl}}"], "path": ["seeker", "profile", "skills"] },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"skillId\": 1,\n  \"level\": \"ADVANCED\",\n  \"years\": 3\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "description": "`level`: BEGINNER | INTERMEDIATE | ADVANCED | EXPERT"
+              }
+            },
+            {
+              "name": "Remove Skill",
+              "request": {
+                "method": "DELETE",
+                "url": {
+                  "raw": "{{baseUrl}}/seeker/profile/skills/1",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["seeker", "profile", "skills", "1"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Applications",
+          "item": [
+            {
+              "name": "Apply for Job",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": {
+                  "raw": "{{baseUrl}}/seeker/jobs/1/apply",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["seeker", "jobs", "1", "apply"]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"coverLetter\": \"I am very interested in this position and believe my skills align well with your requirements.\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                }
+              }
+            },
+            {
+              "name": "My Applications",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/seeker/applications?page=0&size=10",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["seeker", "applications"],
+                  "query": [
+                    { "key": "page", "value": "0" },
+                    { "key": "size", "value": "10" }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Dashboard Stats",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/seeker/dashboard/stats", "host": ["{{baseUrl}}"], "path": ["seeker", "dashboard", "stats"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Provider",
+      "description": "Requires a JWT for a user with role ROLE_JOB_PROVIDER. Login with a provider account first.",
+      "item": [
+        {
+          "name": "Company",
+          "item": [
+            {
+              "name": "Get My Company",
+              "request": {
+                "method": "GET",
+                "url": { "raw": "{{baseUrl}}/provider/company", "host": ["{{baseUrl}}"], "path": ["provider", "company"] }
+              }
+            },
+            {
+              "name": "Create Company",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": { "raw": "{{baseUrl}}/provider/company", "host": ["{{baseUrl}}"], "path": ["provider", "company"] },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Innovate Tech Pvt. Ltd.\",\n  \"description\": \"A leading software company in Nepal.\",\n  \"industry\": \"Software / IT\",\n  \"size\": \"51-200\",\n  \"website\": \"https://innovatetech.com.np\",\n  \"location\": \"Kathmandu, Nepal\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                }
+              }
+            },
+            {
+              "name": "Update Company",
+              "request": {
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": { "raw": "{{baseUrl}}/provider/company", "host": ["{{baseUrl}}"], "path": ["provider", "company"] },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Innovate Tech Pvt. Ltd.\",\n  \"description\": \"Updated company description.\",\n  \"industry\": \"Software / IT\",\n  \"size\": \"201-500\",\n  \"website\": \"https://innovatetech.com.np\",\n  \"location\": \"Lalitpur, Nepal\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                }
+              }
+            },
+            {
+              "name": "Upload Company Logo",
+              "request": {
+                "method": "POST",
+                "url": { "raw": "{{baseUrl}}/provider/company/logo", "host": ["{{baseUrl}}"], "path": ["provider", "company", "logo"] },
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    { "key": "file", "type": "file", "src": "", "description": "PNG or JPG image" }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Company by ID (Public)",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/provider/company/1",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["provider", "company", "1"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Job Postings",
+          "item": [
+            {
+              "name": "Create Job Post",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": { "raw": "{{baseUrl}}/provider/jobs", "host": ["{{baseUrl}}"], "path": ["provider", "jobs"] },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Senior Java Developer\",\n  \"description\": \"We are looking for an experienced Java developer to join our team.\",\n  \"requirements\": \"5+ years Java experience, Spring Boot, Microservices\",\n  \"responsibilities\": \"Design and develop backend APIs, code reviews, mentoring juniors\",\n  \"location\": \"Kathmandu, Nepal\",\n  \"jobType\": \"FULL_TIME\",\n  \"experienceLevel\": \"SENIOR\",\n  \"status\": \"ACTIVE\",\n  \"salaryMin\": 80000,\n  \"salaryMax\": 120000,\n  \"deadline\": \"2026-06-30\",\n  \"maxApplicants\": 50,\n  \"skills\": [\n    { \"skillId\": 1, \"requiredLevel\": \"ADVANCED\", \"isMandatory\": true },\n    { \"skillId\": 2, \"requiredLevel\": \"INTERMEDIATE\", \"isMandatory\": false }\n  ]\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "description": "`jobType`: FULL_TIME | PART_TIME | CONTRACT | INTERNSHIP | FREELANCE\n`experienceLevel`: FRESHER | JUNIOR | MID | SENIOR | LEAD\n`status`: ACTIVE | CLOSED | DRAFT"
+              }
+            },
+            {
+              "name": "List My Job Posts",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/provider/jobs?page=0&size=20",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["provider", "jobs"],
+                  "query": [
+                    { "key": "page", "value": "0" },
+                    { "key": "size", "value": "20" }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update Job Post",
+              "request": {
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": {
+                  "raw": "{{baseUrl}}/provider/jobs/1",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["provider", "jobs", "1"]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Senior Java Developer (Updated)\",\n  \"salaryMin\": 90000,\n  \"salaryMax\": 130000,\n  \"deadline\": \"2026-07-31\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                }
+              }
+            },
+            {
+              "name": "Close Job Post",
+              "request": {
+                "method": "PATCH",
+                "url": {
+                  "raw": "{{baseUrl}}/provider/jobs/1/close",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["provider", "jobs", "1", "close"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "ATS (Applicant Tracking)",
+          "item": [
+            {
+              "name": "Get Applicants for Job",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/provider/jobs/1/applications?status=APPLIED&page=0&size=20",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["provider", "jobs", "1", "applications"],
+                  "query": [
+                    { "key": "status", "value": "APPLIED", "description": "APPLIED | VIEWED | SHORTLISTED | INTERVIEW | OFFERED | REJECTED (optional)" },
+                    { "key": "page", "value": "0" },
+                    { "key": "size", "value": "20" }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update Application Status",
+              "request": {
+                "method": "PATCH",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": {
+                  "raw": "{{baseUrl}}/provider/applications/1/status",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["provider", "applications", "1", "status"]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"SHORTLISTED\",\n  \"notes\": \"Strong profile, schedule technical interview.\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "description": "`status`: APPLIED | VIEWED | SHORTLISTED | INTERVIEW | OFFERED | REJECTED"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Candidate Search",
+          "item": [
+            {
+              "name": "Search Candidates",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/provider/candidates?keyword=java&location=Kathmandu&skillName=Spring Boot&minExp=2&maxExp=5&page=0&size=20",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["provider", "candidates"],
+                  "query": [
+                    { "key": "keyword", "value": "java" },
+                    { "key": "location", "value": "Kathmandu" },
+                    { "key": "skillName", "value": "Spring Boot" },
+                    { "key": "minExp", "value": "2" },
+                    { "key": "maxExp", "value": "5" },
+                    { "key": "page", "value": "0" },
+                    { "key": "size", "value": "20" }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Candidate Profile",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/provider/candidates/1",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["provider", "candidates", "1"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Provider Dashboard",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/provider/dashboard", "host": ["{{baseUrl}}"], "path": ["provider", "dashboard"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "description": "Requires a JWT for a user with role ROLE_ADMIN.",
+      "item": [
+        {
+          "name": "Dashboard Stats",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/admin/dashboard", "host": ["{{baseUrl}}"], "path": ["admin", "dashboard"] }
+          }
+        },
+        {
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/admin/users?page=0&size=20&sortBy=createdAt&sortDir=desc",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" },
+                { "key": "sortBy", "value": "createdAt" },
+                { "key": "sortDir", "value": "desc", "description": "asc | desc" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Toggle User Status",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/1/toggle-status",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users", "1", "toggle-status"]
+            },
+            "description": "Activates a suspended user or suspends an active user."
+          }
+        }
+      ]
+    }
+  ]
+}

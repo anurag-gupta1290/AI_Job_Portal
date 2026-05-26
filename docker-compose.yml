@@ -1,0 +1,75 @@
+version: '3.9'
+
+services:
+  # ── MySQL ────────────────────────────────────────────────────────
+  mysql:
+    image: mysql:8.0
+    container_name: jobportal-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: jobportal
+      MYSQL_USER: jpuser
+      MYSQL_PASSWORD: jppassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backend/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ── Spring Boot Backend ──────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: jobportal-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/jobportal?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USERNAME: jpuser
+      DB_PASSWORD: jppassword
+      JWT_SECRET: cHJvZHVjdGlvbi1zZWNyZXQta2V5LW11c3QtYmUtYXQtbGVhc3QtMjU2LWJpdHMtbG9uZw==
+      ALLOWED_ORIGINS: http://localhost:3000,http://localhost:5173
+      MAIL_HOST: mailhog
+      MAIL_USERNAME: ""
+      MAIL_PASSWORD: ""
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  # ── React Frontend ───────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: jobportal-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+
+  # ── MailHog (local email testing) ────────────────────────────────
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: jobportal-mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Web UI
+
+volumes:
+  mysql_data:
+    driver: local
